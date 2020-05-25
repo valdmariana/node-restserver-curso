@@ -12,20 +12,20 @@ app.get('/usuario', verificaToken, function (req, res) {
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
-    limite = Number();
+    limite = Number(limite);
 
     Usuario.find({ estado: true }, 'nombre email role estado google img')
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {
             if (err) {
-                return res.status(400).json({
+                return res.status(500).json({
                     ok: false,
                     err
                 });
             }
 
-            Usuario.count({ estado: true }, (err, conteo) => {
+            Usuario.countDocuments({ estado: true }, (err, conteo) => {
                 res.json({
                     ok: true,
                     usuarios,
@@ -46,7 +46,7 @@ app.post('/usuario', [verificaToken, verificaAdminRole], function (req, res) {
 
     usuario.save((err, usuarioDB) => {
         if (err) {
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
                 err
             });
@@ -68,7 +68,7 @@ app.put('/usuario/:id', [verificaToken, verificaAdminRole], function (req, res) 
     Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
 
         if (err) {
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
                 err
             });
@@ -84,13 +84,12 @@ app.put('/usuario/:id', [verificaToken, verificaAdminRole], function (req, res) 
 // Borrado logico
 app.delete('/usuario/:id', [verificaToken, verificaAdminRole], function (req, res) {
     let id = req.params.id;
-
     // Borrado fisico
     // Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
     Usuario.findByIdAndUpdate(id, { estado: false }, { new: true }, (err, usuarioBorrado) => {
 
         if (err) {
-            return res.status(400).json({
+            return res.status(500).json({
                 ok: false,
                 err
             });
@@ -109,7 +108,7 @@ app.delete('/usuario/:id', [verificaToken, verificaAdminRole], function (req, re
             ok: true,
             usuario: usuarioBorrado
         });
-    })
+    });
 
 });
 
